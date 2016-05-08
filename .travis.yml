@@ -5,7 +5,7 @@ language: c
 addons:
   apt:
     packages:
-      - tcc # Install Tiny C compiler.
+      - tcc # Install Tiny C compiler!
 
 before_script:
   - tcc -version
