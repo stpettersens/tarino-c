@@ -1,0 +1,14 @@
+notifications:
+  email: false
+
+language: c
+addons:
+  apt:
+    packages:
+      - tcc # Install Tiny C compiler.
+
+before_script:
+  - tcc -version
+
+script:
+  - make && ./tarino
