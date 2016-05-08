@@ -7,5 +7,6 @@ int main(void) {
   //list_tar_entries("tarino.tar", 1);
   //write_tar_entries("tarino.tar", "tarino.entries");
   write_tar_entry("tarino.tar", "Makefile");
+  list_tar_entries("tarino.tar", 1);
   return 0;
 }
