@@ -87,7 +87,7 @@ void to_date_time (int timestamp, char* datetime) {
   strncpy(datetime, ctime(&rawtime), 24);
 }
 
-void pad_str (char* data, int length, char* pdata) {
+char* pad_str (char* data, int length) { //, char* pdata) {
   char padded[100];
   int i;
   int dlz = 0;
@@ -102,7 +102,7 @@ void pad_str (char* data, int length, char* pdata) {
   if (padded[length - 1] == (char)32) {
     padded[length] = '0';
   }
-  strcpy(pdata, padded);
+  return padded; //strcpy(pdata, padded);
 }
 
 int file_exists (char* filename) {
@@ -356,11 +356,11 @@ void extract_entry (char* tarname, int i, int overwrite, int verbose, int extrac
   }
   else {
     char smodified[25];
-    char psize[10];
-    pad_str(size, 10, psize);
+    //char psize[10];
+    //pad_str(size, 10, psize);
     to_date_time(octal_to_dec(modified), smodified);
     printf("%d    %s      %s    %s\n",
-    atoi(mode), psize, smodified, filename);
+    atoi(mode), pad_str(size, 10), smodified, filename);
   }
 
   if (strcmp(type, "5") == 0 && extract == 1) {
