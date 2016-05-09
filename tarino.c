@@ -402,7 +402,7 @@ void extract_entry (char* tarname, int i, int overwrite, int verbose, int extrac
   }
 }
 
-void get_entry_offsets (char* tarname, int* roffsets) {
+int* get_entry_offsets (char* tarname) { //, int* roffsets) {
   int offsets[100000];
   char magic[5];
   int oi, i, size = 0;
@@ -420,7 +420,7 @@ void get_entry_offsets (char* tarname, int* roffsets) {
     }
   }
   fclose(tar);
-  memcpy(roffsets, offsets, 10000);
+  return offsets; //memcpy(roffsets, offsets, 10000);
 }
 
 int get_entries (int* offsets) {
@@ -438,8 +438,8 @@ int extract_tar_entries (char* tarname, int overwrite, int verbose) {
     return -1;
   }
 
-  int offsets[10000];
-  get_entry_offsets(tarname, offsets);
+  //int offsets[10000];
+  int* offsets = get_entry_offsets(tarname); //, offsets);
   int entries = get_entries(offsets);
   if (verbose == 1) {
     printf("tarino-native: Extracting %d entries from archive.\n\n", entries);
@@ -457,8 +457,8 @@ int list_tar_entries (char* tarname, int verbose) {
     return -1;
   }
 
-  int offsets[10000];
-  get_entry_offsets(tarname, offsets);
+  //int offsets[10000];
+  int* offsets = get_entry_offsets(tarname); //, offsets);
   int entries = get_entries(offsets);
   if (verbose == 1) {
     printf("tarino-native: Listing %d entries from archive.\n\n", entries);
