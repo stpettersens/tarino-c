@@ -1,7 +1,8 @@
 install:
-  - echo !TODO
+  - '"C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /x64'
+  - cl.exe /EHsc tarino.c dos2unix.c program.c
 
 test_script:
-  - echo !TODO
+  - tarino.exe
 
 build: off
