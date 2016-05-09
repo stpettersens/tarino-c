@@ -1,8 +1,9 @@
 install:
-  - '"C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /x64'
-  - cl.exe /EHsc tarino.c dos2unix.c program.c
+  - choco install tinycc # Install Tiny C Compiler.
+  - tcc -version
 
 test_script:
-  - tarino.exe
+  - make CC=tcc && tarino.exe
+  # make CC=gcc && tarino.exe
 
 build: off
