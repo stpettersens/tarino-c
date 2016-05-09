@@ -21,4 +21,7 @@ ifeq ($(CC), gcc) # Use GCC.
 endif
 
 make:
-	$(CC) $(SWITCHES) $(INCLUDE) $(LIB) $(LLIB) $(SOURCES) -o $(TARGET)
+	$(CC) $(SWITCHES) $(INCLUDE) $(LIB) $(SOURCES) -o $(TARGET) $(LLIB)
+
+clean:
+	rm -f $(TARGET)

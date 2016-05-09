@@ -13,4 +13,4 @@ before_script:
 
 script:
   - make CC=tcc && ./tarino
-  - make CC=gcc && ./tarino
+  #- make CC=gcc && ./tarino
