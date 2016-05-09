@@ -1,4 +1,5 @@
 CC = tcc # Use Tiny C Compiler by default.
+SWITCHES=
 INCLUDE =
 LIB =
 SOURCES = tarino.c dos2unix.c program.c
@@ -14,9 +15,10 @@ else
 endif
 
 ifeq ($(CC), gcc) # Use GCC.
+	SWITCHES = -s # Strip symbols.
 	INCLUDE =
 	LIB =
 endif
 
 make:
-	$(CC) $(INCLUDE) $(LIB) $(LLIB) $(SOURCES) -o $(TARGET)
+	$(CC) $(SWITCHES) $(INCLUDE) $(LIB) $(LLIB) $(SOURCES) -o $(TARGET)
