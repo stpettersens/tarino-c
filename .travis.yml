@@ -12,7 +12,5 @@ before_script:
   - tcc -version
 
 script:
-  - make && ./tarino
-
-after_script:
+  - make CC=tcc && ./tarino
   - make CC=gcc && ./tarino

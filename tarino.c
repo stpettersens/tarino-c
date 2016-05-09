@@ -87,7 +87,7 @@ void to_date_time (int timestamp, char* datetime) {
   strncpy(datetime, ctime(&rawtime), 24);
 }
 
-char* pad_str (char* data, int length) { //, char* pdata) {
+void pad_str (char* data, int length, char* pdata) {
   char padded[100];
   int i;
   int dlz = 0;
@@ -102,7 +102,7 @@ char* pad_str (char* data, int length) { //, char* pdata) {
   if (padded[length - 1] == (char)32) {
     padded[length] = '0';
   }
-  return padded; //strcpy(pdata, padded);
+  strcpy(pdata, padded);
 }
 
 int file_exists (char* filename) {
@@ -129,7 +129,7 @@ void dec_to_octal (unsigned long long dec, char* octal) {
   int d[12] = {0};
   int i, w;
   unsigned long long working = dec;
-  sprintf(sdec, "%d", dec);
+  sprintf(sdec, "%llu", dec);
   while (working > 0) {
     unsigned long long w = floor(working / 8);
     d[i] = working % 8;
@@ -356,11 +356,11 @@ void extract_entry (char* tarname, int i, int overwrite, int verbose, int extrac
   }
   else {
     char smodified[25];
-    //char psize[10];
-    //pad_str(size, 10, psize);
+    char ssize[12];
+    pad_str(size, 12, ssize);
     to_date_time(octal_to_dec(modified), smodified);
     printf("%d    %s      %s    %s\n",
-    atoi(mode), pad_str(size, 10), smodified, filename);
+    atoi(mode), ssize, smodified, filename);
   }
 
   if (strcmp(type, "5") == 0 && extract == 1) {
@@ -402,7 +402,7 @@ void extract_entry (char* tarname, int i, int overwrite, int verbose, int extrac
   }
 }
 
-int* get_entry_offsets (char* tarname) { //, int* roffsets) {
+void get_entry_offsets (char* tarname, int* roffsets) {
   int offsets[100000];
   char magic[5];
   int oi, i, size = 0;
@@ -420,7 +420,8 @@ int* get_entry_offsets (char* tarname) { //, int* roffsets) {
     }
   }
   fclose(tar);
-  return offsets; //memcpy(roffsets, offsets, 10000);
+  //return offsets;
+  memcpy(roffsets, offsets, 10000);
 }
 
 int get_entries (int* offsets) {
@@ -438,8 +439,9 @@ int extract_tar_entries (char* tarname, int overwrite, int verbose) {
     return -1;
   }
 
-  //int offsets[10000];
-  int* offsets = get_entry_offsets(tarname); //, offsets);
+  int offsets[10000];
+  //int* offsets =
+  get_entry_offsets(tarname, offsets);
   int entries = get_entries(offsets);
   if (verbose == 1) {
     printf("tarino-native: Extracting %d entries from archive.\n\n", entries);
@@ -457,8 +459,9 @@ int list_tar_entries (char* tarname, int verbose) {
     return -1;
   }
 
-  //int offsets[10000];
-  int* offsets = get_entry_offsets(tarname); //, offsets);
+  int offsets[10000];
+  //int* offsets =
+  get_entry_offsets(tarname, offsets);
   int entries = get_entries(offsets);
   if (verbose == 1) {
     printf("tarino-native: Listing %d entries from archive.\n\n", entries);
