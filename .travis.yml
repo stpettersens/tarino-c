@@ -2,9 +2,7 @@ notifications:
   email: false
 
 language: c
-env:
-  -CC=tcc
-  -CC=gcc
+
 addons:
   apt:
     packages:
@@ -15,3 +13,6 @@ before_script:
 
 script:
   - make && ./tarino
+
+after_script:
+  - make CC=gcc && ./tarino
