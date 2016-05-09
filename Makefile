@@ -1,4 +1,4 @@
-CC = tcc # Use Tiny C Compiler.
+CC = tcc # Use Tiny C Compiler by default.
 INCLUDE =
 LIB =
 SOURCES = tarino.c dos2unix.c program.c
@@ -11,6 +11,11 @@ ifeq ($(OS), Windows_NT)
 	LIB = -LC:\Dev\bin\lib
 else
 	LLIB = -lm
+endif
+
+ifeq ($(CC), gcc) # Use GCC.
+	INCLUDE =
+	LIB =
 endif
 
 make:

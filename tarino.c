@@ -29,7 +29,7 @@ void write_checksum (char*, int, char*);
 char* merge_entries (char*, char**);
 void finalize_tar (char*, char*);
 
-char* str_replace (char* str, char c, char r) {
+void str_replace (char* str, char c, char r, char* rstr) {
   char new_str[1000];
   int length = strlen(str);
   int i;
@@ -40,7 +40,7 @@ char* str_replace (char* str, char c, char r) {
       new_str[i] = str[i];
     }
   }
-  return new_str;
+  strcpy(rstr, new_str);
 }
 
 void split (char* str, char* delimiter, char* out1, char* out2) {
@@ -87,22 +87,22 @@ void to_date_time (int timestamp, char* datetime) {
   strncpy(datetime, ctime(&rawtime), 24);
 }
 
-char* pad_str (char* data, int length) {
-  char padding[10000];
+void pad_str (char* data, int length, char* pdata) {
+  char padded[100];
   int i;
   int dlz = 0;
   for (i = 0; i <= length; i++) {
     if (dlz == 0 && data[i] == '0') {
-      padding[i] = (char)32;
+      padded[i] = (char)32;
     } else if (dlz == 1 || data[i] != '0') {
       dlz = 1;
-      padding[i] = data[i];
+      padded[i] = data[i];
     }
   }
-  if (padding[length - 1] == (char)32) {
-    padding[length] = '0';
+  if (padded[length - 1] == (char)32) {
+    padded[length] = '0';
   }
-  return padding;
+  strcpy(pdata, padded);
 }
 
 int file_exists (char* filename) {
@@ -269,7 +269,7 @@ void p_write_tar_entry (char* tarname, char* filename, int _size, int _modified,
 
 // void p_write_tar_entries (char* filename, struct tar_entry entry);
 
-void write_checksum (char* tarname, int etype, char* header) {
+void write_checksum (char* tarname, int etype, char* rheader) {
   char checksum[6];
   char header[265];
   FILE* tar;
@@ -279,6 +279,7 @@ void write_checksum (char* tarname, int etype, char* header) {
   fseek(tar, 148, SEEK_SET);
   fputs(checksum, tar);
   fclose(tar);
+  strcpy(rheader, header);
 }
 
 char* merge_entries (char* tarname, char** entries) {
@@ -355,9 +356,11 @@ void extract_entry (char* tarname, int i, int overwrite, int verbose, int extrac
   }
   else {
     char smodified[25];
+    char psize[10];
+    pad_str(size, 10, psize);
     to_date_time(octal_to_dec(modified), smodified);
     printf("%d    %s      %s    %s\n",
-    atoi(mode), pad_str(size, 10), smodified, filename);
+    atoi(mode), psize, smodified, filename);
   }
 
   if (strcmp(type, "5") == 0 && extract == 1) {
@@ -367,7 +370,8 @@ void extract_entry (char* tarname, int i, int overwrite, int verbose, int extrac
     strcat(command, "-p ");
     strcat(command, filename);
     #else
-    char* wfilename = str_replace(filename, '/', '\\');
+    char wfilename[1000];
+    str_replace(filename, '/', '\\', wfilename);
     strcat(command, wfilename);
     if (file_exists(filename) == 0) {
     #endif
@@ -375,7 +379,7 @@ void extract_entry (char* tarname, int i, int overwrite, int verbose, int extrac
       if (ec == 1) {
         printf("tarino-native: Exit code from system call was 1.\n");
       }
-    #ifdef __win32
+    #ifndef __unix__
     }
     #endif
     memset(command, 0, strlen(command));
@@ -398,7 +402,7 @@ void extract_entry (char* tarname, int i, int overwrite, int verbose, int extrac
   }
 }
 
-int* get_entry_offsets (char* tarname) {
+void get_entry_offsets (char* tarname, int* roffsets) {
   int offsets[100000];
   char magic[5];
   int oi, i, size = 0;
@@ -416,7 +420,7 @@ int* get_entry_offsets (char* tarname) {
     }
   }
   fclose(tar);
-  return offsets;
+  memcpy(roffsets, offsets, 10000);
 }
 
 int get_entries (int* offsets) {
@@ -434,7 +438,8 @@ int extract_tar_entries (char* tarname, int overwrite, int verbose) {
     return -1;
   }
 
-  int* offsets = get_entry_offsets(tarname);
+  int offsets[10000];
+  get_entry_offsets(tarname, offsets);
   int entries = get_entries(offsets);
   if (verbose == 1) {
     printf("tarino-native: Extracting %d entries from archive.\n\n", entries);
@@ -452,7 +457,8 @@ int list_tar_entries (char* tarname, int verbose) {
     return -1;
   }
 
-  int* offsets = get_entry_offsets(tarname);
+  int offsets[10000];
+  get_entry_offsets(tarname, offsets);
   int entries = get_entries(offsets);
   if (verbose == 1) {
     printf("tarino-native: Listing %d entries from archive.\n\n", entries);
