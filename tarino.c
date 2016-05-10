@@ -25,10 +25,6 @@ struct tar_entry {
   int etype;
 };
 
-void write_checksum (char*, int, char*);
-char* merge_entries (char*, char**);
-void finalize_tar (char*, char*);
-
 void str_replace (char* str, char c, char r, char* rstr) {
   char new_str[1000];
   int length = strlen(str);
@@ -67,6 +63,7 @@ int get_gif_length (char* contents) {
       break;
     }
   }
+  return length;
 }
 
 int get_png_length (char* contents) {
@@ -79,6 +76,7 @@ int get_png_length (char* contents) {
       break;
     }
   }
+  return length;
 }
 
 void to_date_time (int timestamp, char* datetime) {
@@ -127,7 +125,7 @@ void dec_to_octal (unsigned long long dec, char* octal) {
   char sdec[12] = {0};
   char soctal[12] = {0};
   int d[12] = {0};
-  int i, w;
+  int i;
   unsigned long long working = dec;
   sprintf(sdec, "%llu", dec);
   while (working > 0) {
@@ -139,7 +137,7 @@ void dec_to_octal (unsigned long long dec, char* octal) {
   while (i >= 0) {
     char c[2];
     sprintf(c, "%d", d[i]);
-    if (i <= strlen(sdec)) {
+    if (i <= (int)strlen(sdec)) {
       strcat(soctal, c);
     }
     i--;
@@ -161,9 +159,9 @@ int octal_to_dec (char* octal) {
 
 void padded_octal (char* octal, int length, char* ppoctal) {
   char poctal[100];
-  if (length > strlen(octal)) {
+  if (length > (int)strlen(octal)) {
     int i;
-    for (i = 0; i < (length - strlen(octal)); i++) {
+    for (i = 0; i < (length - (int)strlen(octal)); i++) {
       strcat(poctal, "0");
     }
   }
@@ -259,18 +257,18 @@ void p_write_tar_entry (char* tarname, char* filename, int _size, int _modified,
   fputs("ustar", tar);
   put_padding(1, tar);
   fputs("00", tar);
-  put_padding(248, tar);
+  put_padding(247, tar);
   fwrite(contents, 1, strlen(contents), tar);
   int ps = get_padding(contents);
   put_padding(ps, tar);
-  put_padding((EOF_PADDING * 2) - 2, tar);
+  put_padding((EOF_PADDING * 2) - 1, tar);
   fclose(tar);
 }
 
 // void p_write_tar_entries (char* filename, struct tar_entry entry);
 
-void write_checksum (char* tarname, int etype, char* rheader) {
-  char checksum[6];
+void write_checksum (char* tarname, int etype) { //, char* rheader) {
+  char checksum[7];
   char header[265];
   FILE* tar;
   tar = fopen(tarname, "rb+");
@@ -279,7 +277,7 @@ void write_checksum (char* tarname, int etype, char* rheader) {
   fseek(tar, 148, SEEK_SET);
   fputs(checksum, tar);
   fclose(tar);
-  strcpy(rheader, header);
+  //strcpy(rheader, header);
 }
 
 char* merge_entries (char* tarname, char** entries) {
@@ -287,11 +285,11 @@ char* merge_entries (char* tarname, char** entries) {
 }
 
 int write_tar_entry (char* tarname, char* filename) {
-  char header[1000];
+  //char header[265];
   int size = get_file_size(filename);
   int modified = get_file_modified(filename);
   p_write_tar_entry(tarname, filename, size, modified, 0);
-  write_checksum(tarname, 0, header);
+  write_checksum(tarname, 0); //, header);
   return 0;
 }
 
