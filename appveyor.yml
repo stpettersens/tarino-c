@@ -1,6 +1,7 @@
 install:
-  - choco install tinycc # Install Tiny C Compiler.
+  - choco install tinycc make # Install Tiny C Compiler and make.
   - tcc -version
+  - make -version
 
 test_script:
   - make CC=tcc && tarino.exe
