@@ -10,6 +10,7 @@ addons:
 
 before_script:
   - tcc -version
+  - make -version
 
 script:
   - make CC=tcc && ./tarino
