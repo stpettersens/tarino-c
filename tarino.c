@@ -2,7 +2,7 @@
   tarino: a tar implementation.
   Port of original Node.js add-on C++ code to C.
 
-  Dual licensed unde the GPL and MIT licenses;
+  Dual licensed under the GPL and MIT licenses;
   see GPL-LICENSE and MIT-LICENSE respectively.
 */
 
