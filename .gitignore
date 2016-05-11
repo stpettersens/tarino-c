@@ -2,3 +2,5 @@ tarino
 *.exe
 *.tar
 *.tar.gz
+*.1
+*.2

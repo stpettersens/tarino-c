@@ -1,2 +1,2 @@
-tarino.1:tarino.c
-tarino.2:tarino.h
+tarino.1:Makefile
+tarino.2:MIT-LICENSE

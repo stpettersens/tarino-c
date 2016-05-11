@@ -17,14 +17,6 @@
 
 static int EOF_PADDING = 512;
 
-struct tar_entry {
-  char* part;
-  char* file;
-  int size;
-  int modified;
-  int etype;
-};
-
 void str_replace (char* str, char c, char r, char* rstr) {
   char new_str[1000];
   int length = strlen(str);
@@ -260,14 +252,11 @@ void p_write_tar_entry (char* tarname, char* filename, int _size, int _modified,
   put_padding(247, tar);
   fwrite(contents, 1, strlen(contents), tar);
   int ps = get_padding(contents);
-  put_padding(ps, tar);
-  put_padding((EOF_PADDING * 2) - 1, tar);
+  put_padding(ps - 1, tar);
   fclose(tar);
 }
 
-// void p_write_tar_entries (char* filename, struct tar_entry entry);
-
-void write_checksum (char* tarname, int etype) { //, char* rheader) {
+void write_checksum (char* tarname, int etype) {
   char checksum[7];
   char header[265];
   FILE* tar;
@@ -277,42 +266,74 @@ void write_checksum (char* tarname, int etype) { //, char* rheader) {
   fseek(tar, 148, SEEK_SET);
   fputs(checksum, tar);
   fclose(tar);
-  //strcpy(rheader, header);
 }
 
-char* merge_entries (char* tarname, char** entries) {
-  // !TODO
+void finalize_tar (char* tarname) {
+  FILE* tar;
+  tar = fopen(tarname, "rb+");
+  fseek(tar, 0, SEEK_END);
+  put_padding((EOF_PADDING * 3) - 1, tar);
+  fclose(tar);
+}
+
+void merge_entries (char* tarname, char** entries, int length) {
+  int i;
+  char command[1000];
+  char fcommand[1000];
+  #ifdef __unix__
+  strcpy(command, "cat ");
+  #else
+  strcpy(command, "copy /b ");
+  #endif
+  for (i = 0; i < 2; i++) {
+    strcat(command, entries[i]);
+    #if __unix__
+    strcat(command, " ");
+    #else
+    strcat(command, "+");
+    #endif
+  }
+  strncpy(fcommand, command, strlen(command) - 1);
+  #if __unix__
+  strcat(fcommand, " > ");
+  #else
+  strcat(fcommand, " ");
+  #endif
+  strcat(fcommand, tarname);
+  printf("%s\n", fcommand);
+  system(fcommand);
 }
 
 int write_tar_entry (char* tarname, char* filename) {
-  //char header[265];
   int size = get_file_size(filename);
   int modified = get_file_modified(filename);
   p_write_tar_entry(tarname, filename, size, modified, 0);
-  write_checksum(tarname, 0); //, header);
+  write_checksum(tarname, 0);
+  finalize_tar(tarname);
   return 0;
 }
 
 int write_tar_entries (char* tarname, char* manifest) {
-  struct tar_entry entry;
   char line[10000];
   char unused[50];
   char tentry[50];
   char part[50];
   char file[50];
+  char* entries[100];
+  int i = 0;
   FILE* f;
   f = fopen(manifest, "r");
   while (fgets(line, sizeof(line), f)) {
     split(line, "\n", tentry, unused);
     split(tentry, ":", part, file);
-    entry.part = part;
-    entry.file = file;
-    entry.size = get_file_size(file);
-    entry.modified = get_file_modified(file);
-    printf("%d\n", entry.size);
-    // p_write_tar_entries(tarname, entry);
+    p_write_tar_entry(part, file, get_file_size(file), get_file_modified(file), 0);
+    write_checksum(part, 0);
+    strcpy(entries[i], part);
+    i++;
   }
   fclose(f);
+  merge_entries(tarname, entries, i);
+  finalize_tar(tarname);
   return 0;
 }
 
@@ -438,7 +459,6 @@ int extract_tar_entries (char* tarname, int overwrite, int verbose) {
   }
 
   int offsets[10000];
-  //int* offsets =
   get_entry_offsets(tarname, offsets);
   int entries = get_entries(offsets);
   if (verbose == 1) {
@@ -458,7 +478,6 @@ int list_tar_entries (char* tarname, int verbose) {
   }
 
   int offsets[10000];
-  //int* offsets =
   get_entry_offsets(tarname, offsets);
   int entries = get_entries(offsets);
   if (verbose == 1) {
